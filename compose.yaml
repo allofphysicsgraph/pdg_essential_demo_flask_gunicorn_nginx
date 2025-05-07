@@ -22,27 +22,34 @@ services:
     #  - "5000:5000"
     # https://docs.gunicorn.org/en/stable/settings.html
     # https://pythonspeed.com/articles/gunicorn-in-docker/
+    # -reload : watch for file changes inside the container at its working directory.
     command: >
       gunicorn
+      --chdir /code
       --reload
       --bind 0.0.0.0:5000
       --forwarded-allow-ips="*"
       --log-level debug
-      wsgi:pdg_app
+      --log-file=/code/logs_gunicorn/gunicorn_logs.log
+      --access-logfile=/code/logs_gunicorn/gunicorn_access.log
+      --error-logfile=/code/logs_gunicorn/gunicorn_error.log
       --capture-output
-      --log-file=gunicorn_logs.log
-      --access-logformat='{"ip":"%({X-Forwarded-For}i)s", "reqtime":"%(L)s", "uname":"%(u)s", "date":"%(t)s", "statline":"%(r)s", "stat":  "%(s)s", "resplen":"%(b)s", "ref":"%(f)s", "ua":"%(a)s"}'
-      --access-logfile=gunicorn_access.log
-      --error-logfile=gunicorn_error.log
       --worker-tmp-dir /dev/shm
       --workers=2 
       --threads=4 
-      --worker-class=gthread 
+      --worker-class=gthread
+      pdg_app:web_app 
 #      --enable-stdio-inheritance
     networks:
       this-internal:
     volumes:
       - ${PWD}/:/scratch
+      - ./logs_gunicorn:/code/logs_gunicorn
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
 
   nginx:
     build: ./nginx_for_pdg
@@ -50,6 +57,7 @@ services:
     depends_on: 
       flask-webserver:
         condition: service_started
+#        condition: service_healthy
     restart: on-failure
     ports:
       - "80:80"

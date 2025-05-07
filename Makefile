@@ -16,7 +16,7 @@ else
 endif
 
 
-webserver_image=demo_flask_gunicorn_ngingx
+webserver_image=flask-webserver
 
 container=docker
 #container=podman
@@ -50,28 +50,13 @@ up:
 	       	$(container) kill $$($(container) ps -q); \
 		fi
 	$(container) ps
-	$(container) run --rm \
-                -w /code \
-                -p 5000:5000 \
-                $(webserver_image) gunicorn --chdir /code \
-                                            --workers 4 \
-                                            --bind 0.0.0.0:5000 \
-                                            --log-level debug \
-                                            --access-logfile - \
-                                            --capture-output \
-                                            wsgi:web_app
-
-# --chdir /code      : change the working directory before the application is loaded.
-# --access-logfile - : configure Gunicorn to log Flask application output to stdout
-# --log-level debug  : for options see https://docs.gunicorn.org/en/stable/settings.html#loglevel
-# --capture-output   : capture print statements and other standard output from the Flask application
-
+	$(container) compose up 
 
 container: container_build container_live
 
 # https://docs.docker.com/build/building/multi-platform/
 container_build:
-	$(container) build -t $(webserver_image) .
+	cd webserver_for_pdg && $(container) build -t $(webserver_image) .
 
 container_live:
 	$(container) run -it --rm \

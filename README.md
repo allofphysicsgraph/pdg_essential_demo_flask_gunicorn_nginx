@@ -1,6 +1,8 @@
 # Demo of Flask in Docker with Gunicorn and nginx
 
-See <https://flask.palletsprojects.com/en/stable/>
+Flask: see <https://flask.palletsprojects.com/en/stable/>
+
+Similar to <https://github.com/sladkovm/docker-flask-gunicorn-nginx> but this one is simpler
 
 To use,
 ```bash
@@ -8,7 +10,7 @@ make container_build
 make up
 ```
 
-In a browser, visit <http://localhost:5000> to see a static HTML page
+In a browser, visit <http://localhost> to see a static HTML page
 
 
 # Guide
